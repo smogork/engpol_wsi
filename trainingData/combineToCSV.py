@@ -1,3 +1,5 @@
+#! /usr//bin/python
+
 import csv
 import sys
 
@@ -20,4 +22,4 @@ while True:
 
     translatedLine = translatedFile.readline()
 
-    writer.writerow([originLine, translatedLine])
+    writer.writerow([originLine.strip('\n'), translatedLine.strip('\n')])
