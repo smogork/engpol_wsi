@@ -97,7 +97,7 @@ def reverse_translation_dictionary(translation_dictionary) -> dict():
 
     return ret
 
-def select_best_translations(translation_dictionary, translation_count, translation_total) -> dict():
+def select_best_translations(translation_dictionary, pol_count, pol_words_total) -> dict():
     ret = dict()
 
     for translationRecord in translation_dictionary:
@@ -107,7 +107,7 @@ def select_best_translations(translation_dictionary, translation_count, translat
         best_pair = ("", "")
 
         for translation in record.original_words:
-            target_probability = translation_count[translation] / translation_total
+            target_probability = pol_count[translation] / pol_words_total
             translation_probability = record.original_words[translation] / record.total_original_words
             prob = target_probability * translation_probability
             if prob > best_probability:
