@@ -1,6 +1,7 @@
 #! /usr/bin/python
 
 import sys
+import csv
 
 class TranslationRecord:
     def __init__(self, translation):
@@ -9,11 +10,14 @@ class TranslationRecord:
         self.total_original_words = 0
 
     def add_word(self, word):
+        self.add_word_count(word, 1)
+
+    def add_word_count(self, word, count):
         if self.original_words.get(word) is None:
-            self.original_words[word] = 1
+            self.original_words[word] = count
         else:
-            self.original_words[word] += 1
-        self.total_original_words += 1
+            self.original_words[word] += count
+        self.total_original_words += count
 
     def __repr__(self):
         ret = ""
@@ -22,7 +26,6 @@ class TranslationRecord:
             ret += f'{self.translation} -> {word}[{self.original_words[word]}]\n'
         
         return ret
-
 
 def usage(command) -> None:
     print(f'Usage: {command} english_data polish_translation output')
@@ -35,17 +38,17 @@ def count_words(line, word_dictionary) -> int:
 
     line.strip()
     for word in line.split():
-        stripped = word.lower().strip('".,?!')
+        stripped = word.lower().strip('".,?!\n-')
 
-        if word_dictionary.get(word) is None:
-            word_dictionary[word] = 1
+        if word_dictionary.get(stripped) is None:
+            word_dictionary[stripped] = 1
         else:
-            word_dictionary[word] += 1
+            word_dictionary[stripped] += 1
         word_in_line += 1
 
     return word_in_line
 
-def count_translations(translationLine, originalLine, translationDictionary):
+def count_translations(translationLine, originalLine, translationDictionary) -> None:
     translationLine.strip()
     originalLine.strip()
     translationWords = translationLine.split()
@@ -53,17 +56,23 @@ def count_translations(translationLine, originalLine, translationDictionary):
 
     #Jezeli nie istnieje dane tlumaczenie, to dodaj element do slownika
     for translation in translationWords:
-        correctTranslation = translation.lower().strip('".,?!')
+        correctTranslation = translation.lower().strip('".,?!\n-')
         if translationDictionary.get(correctTranslation) is None:
             translationDictionary[correctTranslation] = TranslationRecord(correctTranslation)
 
-    #Przypdaek oryginału krótszego lub równego od tłumaczenia
+    #walic roznice dlugosci -> slowo po slowie
+    for it in range(0, min(len(originalWords), len(translationWords))):
+        correct_translation = translationWords[it].lower().strip('".,?!\n-')
+        correct_original = originalWords[it].lower().strip('".,?!\n-')
+        translationDictionary[correct_translation].add_word(correct_original)
+
+    '''#Przypdaek oryginału krótszego lub równego od tłumaczenia
     if len(translationWords) >= len(originalWords):
         offset = 0
         while offset + len(originalWords) <= len(translationWords):
             for original_it in range(0, len(originalWords)):
-                correct_translation = translationWords[original_it + offset].lower().strip('".,?!')
-                correct_original = originalWords[original_it].lower().strip('".,?!')
+                correct_translation = translationWords[original_it + offset].lower().strip('".,?!\n-')
+                correct_original = originalWords[original_it].lower().strip('".,?!\n-')
                 translationDictionary[correct_translation].add_word(correct_original)
             offset += 1
     #Przypdaek tłumaczenia dluższego od oryginalu
@@ -71,11 +80,43 @@ def count_translations(translationLine, originalLine, translationDictionary):
         offset = 0
         while offset + len(translationWords) <= len(originalWords):
             for translation_it in range(0, len(translationWords)):
-                correct_translation = translationWords[translation_it].lower().strip('".,?!')
-                correct_original = originalWords[translation_it + offset].lower().strip('".,?!')
+                correct_translation = translationWords[translation_it].lower().strip('".,?!\n-')
+                correct_original = originalWords[translation_it + offset].lower().strip('".,?!\n-')
                 translationDictionary[correct_translation].add_word(correct_original)
-            offset += 1
+            offset += 1'''
 
+def reverse_translation_dictionary(translation_dictionary) -> dict():
+    ret = dict()
+
+    for translationRecord in translation_dictionary:
+        record = translation_dictionary[translationRecord]
+        for original_word in record.original_words:
+            if ret.get(original_word) is None:
+                ret[original_word] = TranslationRecord(original_word)
+            ret[original_word].add_word_count(record.translation, record.original_words[original_word])
+
+    return ret
+
+def select_best_translations(translation_dictionary, translation_count, translation_total) -> dict():
+    ret = dict()
+
+    for translationRecord in translation_dictionary:
+        record = translation_dictionary[translationRecord]
+
+        best_probability = 0
+        best_pair = ("", "")
+
+        for translation in record.original_words:
+            target_probability = translation_count[translation] / translation_total
+            translation_probability = record.original_words[translation] / record.total_original_words
+            prob = target_probability * translation_probability
+            if prob > best_probability:
+                best_probability = prob
+                best_pair = (record.translation, translation)
+
+        ret[best_pair[0]] = best_pair[1]
+    
+    return ret
 
 def main():
     if len(sys.argv) < 4:
@@ -105,7 +146,19 @@ def main():
                 engLine = eng.readline()
                 polLine = pol.readline()
 
+    #Zamień słownik do zliczenia tłumaczeń na słownik
+    #z prawdopodobieństwami tłumaczeń dla oryginalnych słów
+    reverse_dictionary = reverse_translation_dictionary(translation_count)
+
+    #Przetwórz wyniki na podobne do danych wejściowych brutala
+    brutal_data = select_best_translations(reverse_dictionary, pol_count, pol_words_total)
+
     #Na końcu zapisz wyniki do CSV
+    with open(sys.argv[3], 'w') as csvFile:
+        writer = csv.writer(csvFile)
+        for row in brutal_data:
+            writer.writerow([row, brutal_data[row]])
+
 
 if __name__ == '__main__':
     main()
