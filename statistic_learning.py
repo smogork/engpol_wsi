@@ -110,7 +110,7 @@ def select_best_translations(translation_dictionary, pol_count, pol_words_total)
         for translation in record.original_words:
             target_probability = log(pol_count[translation]) / pol_words_total
             translation_probability = record.original_words[translation] / record.total_original_words
-            prob = target_probability * translation_probability * len (translation)
+            prob = target_probability * translation_probability * len (translation) * len (translation)
             if prob > best_probability:
                 best_probability = prob
                 best_pair = (record.translation, translation)
