@@ -11,6 +11,16 @@
             "program": "brutal.py",
             "console": "integratedTerminal",
             "args": ["trainingData/wordsTranslations.csv"]
+        },
+        {
+            "name": "Debug: Statistic learning",
+            "type": "python",
+            "request": "launch",
+            "program": "statistic_learning.py",
+            "console": "integratedTerminal",
+            "args": ["trainingData/sentences/sentences1.txt",
+                     "trainingData/translatedSentences/sentences1.en.pl.txt",
+                     "test"]
         }
     ]
 }
