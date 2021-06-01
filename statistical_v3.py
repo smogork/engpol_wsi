@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 from string import punctuation, whitespace
 from math import sqrt
 
@@ -112,15 +114,27 @@ if __name__ == '__main__':
 
     translator = StatisticalTranslator(aggregator)
 
-    test_strings = """I will therefore wait patiently until the whole process is up and running to see what our cooperation will look like.
-This is not the way to run Europe.
-We want to go one step further, namely to introduce two weeks of paternity leave.
-The result of which is that everywhere I go now, people treat me like I'm doomed.
-As humans, ultimately being part of the universe, we're kind of the spokespeople or the observer part of the constituency of the universe.
-Where are we to find fish when the Chinese eat as much fish as the Japanese?
-For example, we must eat less meat and we must travel less by car and aeroplane.
-A fool uttereth all his anger; But a wise man keepeth it back and stilleth it.
-Parliament should also play a guard dog role when it comes to the strength of the euro.
+    test_strings = """Ala has cat.
+I am sorry but your going abroad is out of the question.
+The policeman appeared out of the blue and ordered us to leave the house.
+You can get these books for nothing if you ask my brother.
+I will be right back.
+In the meantime, you can watch TV.
+Mike tried to repair his old TV many times, but without success.
+I’ve heard that David was arrested yesterday.
+I think somebody’s trying to frame him.
+Your sister says that you have a brain lesion.
+It was getting dark so I switched on the light and drew the blinds.
+Kate immersed herself in the book.
+How shall I put it?
+I think we’re done.
+Please make sure that we leave on time.
+I tried very hard but we didn’t manage to find common ground.
+Her spoilt children were always crying for the moon.
+If I were you, I would have gone on that trip.
+Long time no see.
+What have you been up to lately?
+Working here is seen by many as a career dead end.
 """.splitlines(keepends=False)
 
     for string in test_strings:
